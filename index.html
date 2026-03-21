@@ -68,40 +68,43 @@
         <button id="generate-btn" class="btn">Générer un Fuze</button>
         <a id="download-btn" class="btn" download="fuze_ia.png">Télécharger</a>
     </div>
+<script type="module">
+    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
 
-    <script>
-        const genBtn = document.getElementById('generate-btn');
-        const dlBtn = document.getElementById('download-btn');
-        const imgEl = document.getElementById('result-img');
-        const loader = document.getElementById('loader');
+    const genBtn = document.getElementById('generate-btn');
+    const dlBtn = document.getElementById('download-btn');
+    const imgEl = document.getElementById('result-img');
+    const loader = document.getElementById('loader');
 
-        // Remplace cette URL par celle de ton API backend (ex: Render ou Hugging Face)
-        const API_URL = "https://ton-api-backend.com/generate"; 
+    genBtn.addEventListener('click', async () => {
+        genBtn.disabled = true;
+        loader.style.display = 'block';
+        loader.innerText = 'L\'IA dessine Fuze...';
+        imgEl.style.display = 'none';
+        dlBtn.style.display = 'none';
 
-        genBtn.addEventListener('click', async () => {
-            genBtn.disabled = true;
-            loader.style.display = 'block';
-            loader.innerText = 'Génération en cours...';
-            imgEl.style.display = 'none';
-            dlBtn.style.display = 'none';
+        try {
+            // Connexion au client (Note le "C" majuscule à Client)
+            const client = await Client.connect("daxty/fuzeIIIproject");
+            
+            // On appelle EXACTEMENT "/generate_fuze" comme indiqué dans tes logs
+            const result = await client.predict("/generate_fuze"); 
 
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
+            // Gradio 6+ renvoie souvent l'URL directement dans result.data[0].url
+            const imageUrl = result.data[0].url || result.data[0];
+            
+            imgEl.src = imageUrl;
+            imgEl.style.display = 'block';
+            loader.style.display = 'none';
+            
+            dlBtn.href = imageUrl;
+            dlBtn.style.display = 'inline-block';
 
-                imgEl.src = data.image; // L'API renvoie l'image en base64
-                imgEl.style.display = 'block';
-                loader.style.display = 'none';
-                
-                dlBtn.href = data.image;
-                dlBtn.style.display = 'inline-block';
-            } catch (error) {
-                loader.innerText = 'Erreur de connexion au cerveau IA.';
-                console.error(error);
-            } finally {
-                genBtn.disabled = false;
-            }
-        });
-    </script>
-</body>
-</html>
+        } catch (error) {
+            loader.innerText = 'Erreur : Le cerveau IA est fatigué.';
+            console.error("Détails de l'erreur:", error);
+        } finally {
+            genBtn.disabled = false;
+        }
+    });
+</script>
