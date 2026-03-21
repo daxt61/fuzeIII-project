@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Fuze AI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { color: #bb86fc; }
+        .container {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        #image-box {
+            width: 256px;
+            height: 256px;
+            background: #2c2c2c;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .btn {
+            background-color: #bb86fc;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover { background-color: #9965f4; }
+        .btn:disabled { background-color: #555; cursor: not-allowed; }
+        #download-btn { background-color: #03dac6; display: none; text-decoration: none;}
+        #download-btn:hover { background-color: #018786; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Fuze AI Generator</h1>
+        <p>Une IA entraînée pour dessiner Fuze</p>
+        
+        <div id="image-box">
+            <span id="loader">Appuie sur Générer !</span>
+            <img id="result-img" alt="Fuze généré" />
+        </div>
+
+        <button id="generate-btn" class="btn">Générer un Fuze</button>
+        <a id="download-btn" class="btn" download="fuze_ia.png">Télécharger</a>
+    </div>
+
+    <script>
+        const genBtn = document.getElementById('generate-btn');
+        const dlBtn = document.getElementById('download-btn');
+        const imgEl = document.getElementById('result-img');
+        const loader = document.getElementById('loader');
+
+        // Remplace cette URL par celle de ton API backend (ex: Render ou Hugging Face)
+        const API_URL = "https://ton-api-backend.com/generate"; 
+
+        genBtn.addEventListener('click', async () => {
+            genBtn.disabled = true;
+            loader.style.display = 'block';
+            loader.innerText = 'Génération en cours...';
+            imgEl.style.display = 'none';
+            dlBtn.style.display = 'none';
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                imgEl.src = data.image; // L'API renvoie l'image en base64
+                imgEl.style.display = 'block';
+                loader.style.display = 'none';
+                
+                dlBtn.href = data.image;
+                dlBtn.style.display = 'inline-block';
+            } catch (error) {
+                loader.innerText = 'Erreur de connexion au cerveau IA.';
+                console.error(error);
+            } finally {
+                genBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
